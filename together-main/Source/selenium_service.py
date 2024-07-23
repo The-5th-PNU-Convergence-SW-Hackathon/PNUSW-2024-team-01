@@ -24,7 +24,7 @@ class WriteNoticeService:
     def write_notices(self, id: str, pw: str, course_name: str, announcements: List[Announcement]):
         self.login(id, pw)
         self.move_to_course(course_name)
-        self.move_to_notice_board("공모전/ 공대")
+        self.move_to_notice_board("[공모전] 공학/IT/SW")
         for announcement in announcements:
             self.write_notice_in_board(announcement.title, announcement.content)
 
@@ -39,15 +39,15 @@ class WriteNoticeService:
         submit.click()
 
     def move_to_course(self, course_name: str):
-        course_link = self.driver.find_element(By.XPATH, '//a[@href="https://plato.pusan.ac.kr/course/view.php?id=157301"]')
+        course_link = self.driver.find_element(By.XPATH, '//h3[text()="'+ course_name +'"]/ancestor::a')
         course_link.click()
 
     def move_to_notice_board(self, notice_board_name: str):
-        notice_board_link = self.driver.find_element(By.XPATH, '//a[@href="https://plato.pusan.ac.kr/mod/ubboard/view.php?id=1880175"]')
+        notice_board_link = self.driver.find_element(By.XPATH, '//a[contains(span[@class="instancename"], "' + notice_board_name + '")]')
         notice_board_link.click()
 
     def write_notice_in_board(self, subject: str, content: str):
-        write_button = self.driver.find_element(By.XPATH, '//a[@href="https://plato.pusan.ac.kr/mod/ubboard/write.php?id=1880175"]')
+        write_button = self.driver.find_element(By.XPATH, '//a[contains(text(), "쓰기")]')
         write_button.click()
 
         input_subject = self.driver.find_element(By.NAME, "subject")
