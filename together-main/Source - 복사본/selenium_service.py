@@ -47,7 +47,7 @@ class WriteNoticeService:
             notice_board_link = self.driver.find_element(By.XPATH, '//a[contains(span[@class="instancename"], "' + notice_board_name + '")]')
             notice_board_link.click()
         except Exception as e:
-            print(f"게시판을 찾을 수 없습니다: {notice_board_name}, 오류: {str(e)}")
+            print(f"게시판을 찾을 수 없습니다: {notice_board_name})
 
     def write_notice_in_board(self, subject: str, content: str):
         write_button = self.driver.find_element(By.XPATH, '//a[contains(text(), "쓰기")]')
