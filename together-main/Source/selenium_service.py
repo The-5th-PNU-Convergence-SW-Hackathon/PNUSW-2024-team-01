@@ -6,6 +6,7 @@ from selenium.webdriver.support import expected_conditions as EC
 import os
 from typing import List
 from crawl_announcement import Announcement
+from bs4 import BeautifulSoup
 
 class WriteNoticeService:
     def __init__(self):
@@ -57,11 +58,20 @@ class WriteNoticeService:
         input_subject.send_keys(subject)
 
         input_content = self.driver.find_element(By.ID, "id_contenteditable")
-        self.driver.execute_script("arguments[0].innerHTML = arguments[1];", input_content, content)
+
+        # BeautifulSoup을 사용하여 이미지 태그에 클래스 추가
+        soup = BeautifulSoup(content, 'html.parser')
+        images = soup.find_all('img')
+        for img in images:
+            img['class'] = img.get('class', []) + ['img-responsive', 'atto_image_button_text-bottom']
+
+        content_with_styles = str(soup)
+
+        self.driver.execute_script("arguments[0].innerHTML = arguments[1];", input_content, content_with_styles)
         input_content.click()
 
         # 파일 업로드 수행
-        self.upload_files(files)  # 파일 경로 리스트를 전달
+        self.upload_files(files)
 
         # 저장 버튼 클릭
         self.click_with_js('input[type="submit"].btn-primary')
@@ -73,7 +83,6 @@ class WriteNoticeService:
     def upload_file(self, file_path: str):
         # 첨부파일 요소 찾기 및 클릭
         self.click_with_js('a[role="button"][title="추가 ..."].btn.btn-default.btn-sm')
-        # print('파일 추가 버튼 클릭됨.')
 
         # 파일 선택 요소 찾기
         file_input = WebDriverWait(self.driver, 5).until(
@@ -81,16 +90,13 @@ class WriteNoticeService:
         )
 
         # 파일 경로를 절대 경로로 변환
-        absolute_path = os.path.abspath(os.path.join("C:\\together-main\\Source\\", file_path))
-        # print(f'업로드할 파일 경로: {absolute_path}')
+        absolute_path = os.path.abspath(file_path)
 
         # 파일 경로를 입력하여 파일 선택
         file_input.send_keys(absolute_path)
-        # print('파일이 성공적으로 선택되었습니다.')
 
         # 파일 업로드 버튼 클릭
         self.click_with_js('button.fp-upload-btn.btn-primary.btn')
-        # print('파일 업로드 버튼 클릭됨.')
 
     def click_with_js(self, css_selector: str):
         element = WebDriverWait(self.driver, 5).until(
