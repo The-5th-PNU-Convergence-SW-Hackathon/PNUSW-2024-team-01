@@ -55,7 +55,7 @@ def check_title_similarity(new_title, recent_titles):
         "role": "system",
         "content": (
             "Judge whether the following new title is a duplicate of any of the recent titles. If it's the same, output 중복\n"
-            "Even if the content is the same, the first 2-3 words of the new title might be different.\n"
+            "Even if the content is the same, the first 2-3 characters of the new title might be different.\n"
             "In other words, even if the titles are not exactly the same, if you determine the content is the same, output 중복.\n"
             "If it's not the same, output 중복 아님. Do not say anything other than these two responses.\n"
             "The output must be in Korean. Do not use quotation marks. Never say anything else."
