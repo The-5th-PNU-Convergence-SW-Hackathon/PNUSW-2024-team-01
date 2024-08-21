@@ -1,7 +1,7 @@
 import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QLabel, QLineEdit, QFileDialog
 from main import main
-print("0")
+print("1")
 def execute():
     user_id = input_id.text()
     user_pw = input_pw.text()   
