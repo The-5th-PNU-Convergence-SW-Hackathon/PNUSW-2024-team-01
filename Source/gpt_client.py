@@ -58,16 +58,28 @@ def answer_gpt(user_content):
 def check_title_similarity(new_title, recent_titles):
     system_message = {
         "role": "system",
-        "content": (
-    "Judge whether the following new title is a duplicate of any of the recent titles. "
-    "Each input will contain only one announcement title per line. "
-    "Recent titles have already been published, and it is crucial to determine whether the new title should be posted. "
-    "If the new title is the same or very similar to any of the recent titles, including specific events, names, dates, or locations, output 중복. "
-    "Consider minor differences in wording, punctuation, or formatting as duplicates if the main content is the same. "
-    "If the new title is semantically or contextually similar to any of the recent titles, even if the wording or phrasing is different, output 중복. "
-    "Give additional weight to newer titles when determining similarity, making it more likely to classify a title as 중복 if it closely resembles more recent entries. "
-    "Remember, duplicating the same post would cause significant inconvenience to users, so it's essential to avoid posting the same content twice. "
-    "The output must be exactly 중복 or 중복 아님, with no additional text or punctuation. Never say anything else.")
+        "content": ("""
+Judge whether the new announcement title is a duplicate of any recent titles. 
+Each input will contain only one announcement title per line. 
+Recent titles have already been published, and it is crucial to determine whether the new title should be posted. 
+
+If the new title is exactly identical to any of the recent titles, 
+including specific events, names, dates, or locations, output 중복. 
+
+Consider minor differences in wording, punctuation, or formatting as non-duplicates 
+if the main content is still distinguishable. 
+
+If the new title is semantically or contextually very similar to any of the recent titles, 
+but with noticeable differences in expression or phrasing, output 중복 아님. 
+
+Give additional weight to newer titles when determining similarity, 
+but only classify a title as 중복 if it closely resembles a very recent entry.
+
+Avoid posting the same content twice to prevent significant inconvenience to users, 
+but allow for some flexibility in interpretation. 
+
+The output must be either 중복 or 중복 아님, with no additional text or punctuation.
+""")
     }
 
     user_message = {
