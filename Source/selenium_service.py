@@ -30,7 +30,7 @@ class WriteNoticeService:
         self.driver.get('https://plato.pusan.ac.kr/')
 
         # 로그인 수행
-        self.login(os.getenv("PLATO_ID"), os.getenv("PLATO_PW"))
+        self.login(os.getenv('PLATO_ID'), os.getenv('PLATO_PW'))
 
     def login(self, id: str, pw: str):
         username_input = self.driver.find_element(By.ID, 'input-username')
@@ -62,7 +62,13 @@ class WriteNoticeService:
                 self.move_to_course(course_url)
 
     def write_notice_in_board(self, subject: str, url: str, content: str, files: List[str]):
-        write_button = self.driver.find_element(By.XPATH, '//a[contains(text(), "쓰기")]')
+        # '쓰기' 버튼을 찾고 화면에 나타날 때까지 스크롤 (공지글이 많으면 버튼이 밀림)
+        write_button = WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, '//a[contains(text(), "쓰기")]'))
+        )
+
+        # 스크롤하여 요소가 보이도록 함
+        self.driver.execute_script("arguments[0].scrollIntoView(true);", write_button)
         write_button.click()
 
         input_subject = self.driver.find_element(By.NAME, "subject")
@@ -73,7 +79,7 @@ class WriteNoticeService:
         # 본문 최상단에 공지사항 링크 추가
         content_with_link = f'<p>본문 링크 : <a href="{url}">{url}</a></p>' + content
 
-        # BeautifulSoup을 사용하여 이미지 태그에 클래스 추가
+        # BeautifulSoup을 사용하여 이미지 태그에 클래스 추가 (화면 맞춤)
         soup = BeautifulSoup(content_with_link, 'html.parser')
         images = soup.find_all('img')
         for img in images:
@@ -99,7 +105,7 @@ class WriteNoticeService:
                     EC.presence_of_element_located((By.CSS_SELECTOR, 'input[type="file"]'))
                 )
             except:
-                # 파일 선택 요소를 찾지 못하면 저장 버튼 클릭 (업로드 대기)
+                # 파일 선택 요소를 찾지 못하면 저장 버튼 클릭 (업로드 시간 대기 용)
                 self.click_with_js('input[type="submit"].btn-primary')
         else:
             # 파일이 없으면 바로 저장 버튼 클릭
