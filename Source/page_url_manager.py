@@ -1,4 +1,6 @@
 import pandas as pd
+from dotenv import load_dotenv
+import os
 
 def extract_domain_part(url, domain):
     domain_index = url.find(domain)
@@ -19,8 +21,9 @@ class AnnouncementPage:
 
 class PageUrlManager:
     def __init__(self):
-        filename = "C:\\together-main\\Source\\pages.csv"
-        df = pd.read_csv(filename)
+        load_dotenv()
+        filename = os.getenv("PAGE_NAME")
+        df = pd.read_csv(f'{filename}')
         self.announcement_pages = []
         self.__init_announcement_pages(df)
 
@@ -38,4 +41,3 @@ class PageUrlManager:
                     number=number
                 )
             )
-
