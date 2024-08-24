@@ -4,7 +4,7 @@ import tiktoken
 from gpt_client import check_title_similarity
 from difflib import SequenceMatcher
 
-def truncate_text(text, max_tokens):
+def truncate_text(text, max_tokens):  # 토큰 수 이하로 자르기
     encoding = tiktoken.get_encoding("cl100k_base")
 
     # 텍스트를 토큰으로 인코딩
@@ -32,13 +32,13 @@ def is_recent_title_duplicate(new_title, filename='titles.txt'):
                 if saved_date > datetime.now() - timedelta(days=7):
                     recent_titles.append((saved_date, saved_title))
 
-    # 최신 제목들을 날짜 기준으로 정렬하고 1000개 이하로 자르기
+    # 최신 제목들을 날짜 기준으로 정렬하고 100개 이하로 자르기
     recent_titles.sort(reverse=True, key=lambda x: x[0])  # 최신순으로 정렬
-    recent_titles = [title for _, title in recent_titles[:1000]]  # 1000개 이하로 자름
+    recent_titles = [title for _, title in recent_titles[:100]]  # 100개 이하로 자름
 
-    # 원시적인 텍스트 유사도 검사 (80% 이상이면 중복으로 간주)
+    # 원시적인 텍스트 유사도 검사 (90% 이상이면 중복으로 간주)
     for title in recent_titles:
-        if calculate_similarity(new_title, title) >= 0.8:
+        if calculate_similarity(new_title, title) >= 0.9:
             return '중복'
 
     # GPT를 사용해 중복 여부 판단
