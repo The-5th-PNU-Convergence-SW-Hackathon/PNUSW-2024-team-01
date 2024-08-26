@@ -19,7 +19,7 @@ def answer_gpt(user_content):
         "[Competition/Contest] Art/Design/Architecture =([공모전] 미술/디자인/건축)\n"
         "[Competition/Contest] Literature/Personal Narrative/Essay =([공모전] 문학/수기/에세이)\n"
         "[Competition/Contest] Miscellaneous (for contests not clearly falling into other categories or if uncertain) =([공모전] 기타)\n"
-        "Education/Lecture/Program =(교육/특강/프로그램)\n"
+        "Kind of Education/Lecture/Program or International assignment/Exchange student =(교육/특강/프로그램)\n"
         "Scholarship/Scholar (only those awarded, including work-study students) =(장학금)\n"
         "Supporters/Ambassadors =(서포터즈)\n"
         "Volunteer Work =(봉사활동)\n"
@@ -59,32 +59,33 @@ def check_title_similarity(new_title, recent_titles):
     system_message = {
         "role": "system",
         "content": ("""
-Judge whether the new announcement title is a duplicate of any recent titles. 
-Each input will contain only one announcement title per line. 
-Recent titles have already been published, and it is crucial to determine whether the new title should be posted. 
+    Judge whether the new announcement title is a duplicate of any recent titles. 
+    Each input will contain only one announcement title per line. 
+    Recent titles have already been published, and it is crucial to determine whether the new title should be posted. 
 
-If the new title is exactly identical to any of the recent titles, 
-including specific events, names, dates, or locations, output 중복. 
+    If the new title is exactly identical to any of the recent titles, including specific events, names, dates, or locations, output 중복. 
 
-Consider minor differences in wording, punctuation, or formatting as non-duplicates 
-if the main content is still distinguishable. 
+    If the new title contains only minor differences in wording, punctuation, or formatting, 
+    but the overall meaning or context is highly similar to any of the recent titles, output 중복.
 
-If the new title is semantically or contextually very similar to any of the recent titles, 
-but with noticeable differences in expression or phrasing, output 중복 아님. 
+    If the new title contains the same core message or event, even if specific details (such as prefixes, suffixes, or additional clarifying words) have been removed or altered, output 중복.
 
-Give additional weight to newer titles when determining similarity, 
-but only classify a title as 중복 if it closely resembles a very recent entry.
+    If the new title has substantial differences in content, 
+    even if there are similarities in expression or phrasing, output 중복 아님.
 
-Avoid posting the same content twice to prevent significant inconvenience to users, 
-but allow for some flexibility in interpretation. 
+    Give additional weight to newer titles when determining similarity, 
+    but only classify a title as 중복 if it closely resembles a very recent entry.
 
-The output must be either 중복 or 중복 아님, with no additional text or punctuation.
-""")
+    Avoid posting the same content twice to prevent significant inconvenience to users, 
+    but allow for some flexibility in interpretation. 
+
+    The output must be either 중복 or 중복 아님, with no additional text or punctuation.
+    """)
     }
 
     user_message = {
         "role": "user",
-        "content": f"새로운 제목: {new_title}\n최근 제목들: " + "\n".join(recent_titles)
+        "content": f"최근 제목들: " + "\n".join(recent_titles) + f"\n새로운 제목: {new_title}"
     }
 
     messages = [system_message, user_message]
