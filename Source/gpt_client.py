@@ -12,22 +12,20 @@ def answer_gpt(user_content):
             "role": "system",
             "content": (
         "Categorize the following text into the appropriate category and only state the category.\n"
-        "If the text contains keywords like '서포터즈', '봉사', '취업', etc., categorize it accordingly.\n"
-        "Consider variations in wording and synonyms as matching the relevant category.\n\n"
+        "Consider variations in wording and synonyms as matching the relevant category.\n"
+        "If the text includes the keywords '공모전' or '경진대회', categorize it into the most appropriate [공모전] category.\n"
         "[Competition/Contest] Engineering/Information Technology/Software =([공모전] 공학/IT/SW)\n"
         "[Competition/Contest] Ideas/Planning =([공모전] 아이디어/기획)\n"
         "[Competition/Contest] Art/Design/Architecture =([공모전] 미술/디자인/건축)\n"
         "[Competition/Contest] Literature/Personal Narrative/Essay =([공모전] 문학/수기/에세이)\n"
         "[Competition/Contest] Miscellaneous (for contests not clearly falling into other categories or if uncertain) =([공모전] 기타)\n"
-        "Kind of Education/Lecture/Program or International assignment/Exchange student =(교육/특강/프로그램)\n"
+        "Kind of Education/Lecture/Program or International assignment/Exchange student including Survey Participation Invitation =(교육/특강/프로그램)\n"
         "Scholarship/Scholar (only those awarded, including work-study students) =(장학금)\n"
         "Supporters/Ambassadors =(서포터즈)\n"
-        "Volunteer Work =(봉사활동)\n"
-        "Employment Information (only company hiring, excluding graduate school, dormitories, etc.) =(취업 정보)\n\n"
-        "If the text, based on its context, is related to '대학원', '진학', '연구 조교', '수강 신청', '수강지도', '등록금', '졸업', '논문' or similar topics, categorize it as 'Not Applicable =(해당없음)'.\n\n"
-        "If the text contains negative keywords such as '취소', '연기', '변경', or indicates that the event has been canceled or postponed, categorize it as 'Not Applicable =(해당없음)'.\n\n"
-        "If the text is too short, unclear, or does not fit into any category, respond with 'Not Applicable =(해당없음)'.\n\n"
-        "If the text could fit into multiple categories, prioritize the most relevant category or the first applicable one.\n\n"
+        "Volunteer Work/Mentoring/Tutoring =(봉사활동)\n"
+        "Employment Information/Job Fair/Recruitment Fair (only company hiring, excluding graduate school, dormitories, etc.) =(취업 정보)\n"
+        "If the text is too short, unclear, or does not fit into any category, respond with 해당없음.\n"
+        "If the text could fit into multiple categories, prioritize the most relevant category or the first applicable one.\n"
         "The output must be one of the following: \n"
         "[공모전] 공학/IT/SW,\n"
         "[공모전] 아이디어/기획,\n"
@@ -39,7 +37,7 @@ def answer_gpt(user_content):
         "서포터즈,\n"
         "봉사활동,\n"
         "취업 정보,\n"
-        "or 해당없음.\n\n"
+        "해당없음\n\n"
         "Never include any punctuation, quotation marks, or extra text. Only provide the exact category name as the output. The output must be in Korean. Never say anything else."
 )
         },
@@ -59,29 +57,18 @@ def check_title_similarity(new_title, recent_titles):
     system_message = {
         "role": "system",
         "content": ("""
-    Judge whether the new announcement title is a duplicate of any recent titles. 
-    Each input will contain only one announcement title per line. 
-    Recent titles have already been published, and it is crucial to determine whether the new title should be posted. 
+    Determine if the new title is a duplicate of any recent titles. 
+    Consider it 중복 if:
 
-    If the new title is exactly identical to any of the recent titles, including specific events, names, dates, or locations, output 중복. 
+    - The title is identical or nearly identical, including minor variations.
+    - The title has the same core message, even with different wording or details.
 
-    If the new title contains only minor differences in wording, punctuation, or formatting, 
-    but the overall meaning or context is highly similar to any of the recent titles, output 중복.
+    If the title differs significantly in content or context, output 중복 아님.
 
-    If the new title contains the same core message or event, even if specific details (such as prefixes, suffixes, or additional clarifying words) have been removed or altered, output 중복.
-
-    If the new title has substantial differences in content, 
-    even if there are similarities in expression or phrasing, output 중복 아님.
-
-    Give additional weight to newer titles when determining similarity, 
-    but only classify a title as 중복 if it closely resembles a very recent entry.
-
-    Avoid posting the same content twice to prevent significant inconvenience to users, 
-    but allow for some flexibility in interpretation. 
-
-    The output must be either 중복 or 중복 아님, with no additional text or punctuation.
+    The output should be either 중복 or 중복 아님, with no extra text.
     """)
-    }
+}
+
 
     user_message = {
         "role": "user",
