@@ -1,41 +1,50 @@
 from gpt_client import answer_gpt
 from crawl_announcement import get_anns_url, crawl_ann_partial, crawl_ann
 from selenium_service import WriteNoticeService
-from dotenv import load_dotenv
 from duplicate_checker import is_recent_title_duplicate, save_title, truncate_text
 from page_url_manager import PageUrlManager
 import pandas as pd
 import gc
 import os
+from datetime import datetime
 
 # 사전 정의된 키워드와 카테고리 매핑
 KEYWORD_CATEGORIES = {
     "장학금": "장학금",
-    "장학생": "장학금",
+    "근로장학": "장학금",
     "지원금": "장학금",
+    "연구장학": "장학금",
+    "장학사업": "장학금",
     "독후감": "[공모전] 문학/수기/에세이",
     "에세이": "[공모전] 문학/수기/에세이",
     "아이디어": "[공모전] 아이디어/기획",
-    "봉사": "봉사활동",
+    "튜티": "교육/특강/프로그램",
     "튜터": "봉사활동",
     "서포터즈": "서포터즈",
     "기자단": "서포터즈",
+    "네트워크": "서포터즈",
     "앰배서더": "서포터즈",
-    "취업": "취업 정보",
     "인턴": "취업 정보",
     "일자리": "취업 정보",
     "공개모집": "취업 정보",
     "공개 모집": "취업 정보",
-    "채용": "취업 정보",
+    "공개채용": "취업 정보",
+    "공개 채용": "취업 정보",
     "공채": "취업 정보",
+    "추천채용": "취업 정보",
+    "채용설명회": "취업 정보",
+    "채용상담회": "취업 정보",
     "현장실습": "취업 정보",
     "현장 실습": "취업 정보",
     "아카데미": "교육/특강/프로그램",
-    "세미나": "교육/특강/프로그램"
+    "세미나": "교육/특강/프로그램",
+    "포럼": "교육/특강/프로그램",
+    "컨퍼런스": "교육/특강/프로그램",
+    "지원프로그램": "교육/특강/프로그램"
 }  # 지속적으로 추가 예정
 
 # 제외할 키워드
-EXCLUDE_KEYWORDS = ["졸업", "대출", "재입학", "진학", "수강 신청", "수강신청", "수강 지도", "수강지도", "수강정정", "취소", "연기", "변경"]  # 추가 예정
+EXCLUDE_KEYWORDS = ["졸업", "대출", "재입학", "진학", "수강 신청", "수강신청", "수강 지도", "수강지도", "수강정정", "취소", "변경", "휴학", "복학"]  # 추가 예정
 
 def categorize_by_keywords(title, content_text):
     # 제목과 내용에서 키워드를 검색하여 게시판을 직접 분류. 매핑된 카테고리가 있는 경우 해당 카테고리로 분류, 아니면 None 반환
@@ -71,7 +80,7 @@ def update_csv_with_announcement_numbers(updates, filename: str):
     df.to_csv(filename, index=False)
 
 def main():
-    load_dotenv()
+    today_date = datetime.now().strftime("%Y-%m-%d") # 오늘 날짜 가져오기
     page_url_manager = PageUrlManager()
     announcements = []
     updates = {}  # 업데이트할 URL과 공지 번호 저장
@@ -97,18 +106,18 @@ def main():
 
                 # 키워드 기반 카테고리 분류 시도
                 category = categorize_announcement(partial_ann.title, partial_ann.content_text)
-                print(f"카테고리 분류 결과: {category} - {partial_ann.title}")
+                print(f"카테고리 분류 결과: {category}")
 
                 if category in [
+                    "교육/특강/프로그램",
                     "[공모전] 공학/IT/SW",
                     "[공모전] 아이디어/기획",
                     "[공모전] 미술/디자인/건축",
                     "[공모전] 문학/수기/에세이",
                     "[공모전] 기타",
-                    "교육/특강/프로그램",
                     "장학금",
-                    "서포터즈",
                     "봉사활동",
+                    "서포터즈",
                     "취업 정보"
                 ]:
                     # 전체 공지사항 크롤링
@@ -116,10 +125,6 @@ def main():
                     full_ann.notice_board_name = category  # 게시판 이름 업데이트
                     announcements.append(full_ann)
                     save_title(partial_ann.title)  # 제목 저장
-
-                    # 주기적으로 파일 핸들을 관리하기 위해 파일 닫기
-                    with open('log.txt', 'a') as log_file:
-                        log_file.write(f"Saved announcement: {full_ann.title}\n")
 
                     writenoticeService.write_notices(course_url, [full_ann])  # 공지사항 작성
                     print(f"게시글 작성 완료\n")
@@ -131,6 +136,12 @@ def main():
             updates[announcement_page.page_url] = latest_announcement_number
             update_csv_with_announcement_numbers(updates, os.getenv('PAGE_NAME'))
             updates = {}
+
+    # 공지글 체크 해제 및 별 제거 작업 시작 알림
+    print("공지글 수정 작업을 시작합니다.")
+
+    # 오늘 올린 공지가 아닌 모든 게시글의 공지글 체크 해제 및 별 제거
+    writenoticeService.remove_stars_and_uncheck_notices(course_url, today_date)
 
 if __name__ == "__main__":
     main()
