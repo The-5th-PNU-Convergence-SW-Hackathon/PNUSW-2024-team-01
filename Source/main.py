@@ -3,51 +3,20 @@ from crawl_announcement import get_anns_url, crawl_ann_partial, crawl_ann
 from selenium_service import WriteNoticeService
 from duplicate_checker import is_recent_title_duplicate, save_title, truncate_text
 from page_url_manager import PageUrlManager
+import json
 import pandas as pd
 import gc
 import os
 from datetime import datetime
 
-# 사전 정의된 키워드와 카테고리 매핑
-KEYWORD_CATEGORIES = {
-    "장학금": "장학금",
-    "근로장학": "장학금",
-    "지원금": "장학금",
-    "연구장학": "장학금",
-    "장학사업": "장학금",
-    "독후감": "[공모전] 문학/수기/에세이",
-    "에세이": "[공모전] 문학/수기/에세이",
-    "글쓰기": "[공모전] 문학/수기/에세이",
-    "아이디어": "[공모전] 아이디어/기획",
-    "튜티": "교육/특강/프로그램",
-    "튜터": "봉사활동",
-    "서포터즈": "서포터즈",
-    "기자단": "서포터즈",
-    "네트워크": "서포터즈",
-    "앰배서더": "서포터즈",
-    "인턴": "취업 정보",
-    "일자리": "취업 정보",
-    "공개모집": "취업 정보",
-    "공개 모집": "취업 정보",
-    "공개채용": "취업 정보",
-    "공개 채용": "취업 정보",
-    "공채": "취업 정보",
-    "추천채용": "취업 정보",
-    "채용설명회": "취업 정보",
-    "채용상담회": "취업 정보",
-    "현장실습": "취업 정보",
-    "현장 실습": "취업 정보",
-    "아카데미": "교육/특강/프로그램",
-    "세미나": "교육/특강/프로그램",
-    "포럼": "교육/특강/프로그램",
-    "컨퍼런스": "교육/특강/프로그램",
-    "지원프로그램": "교육/특강/프로그램",
-    "페스티벌": "교육/특강/프로그램"
-}  # 지속적으로 추가 예정
+# JSON 파일 불러오기
+with open('env.json', 'r', encoding='utf-8') as f:
+    config = json.load(f)
 
-# 제외할 키워드
-EXCLUDE_KEYWORDS = ["졸업", "대출", "재입학", "진학", "수강 신청", "수강신청", "수강 지도", "수강지도", "수강정정", "취소", "변경", "휴학", "복학"]  # 추가 예정
-
+# JSON 데이터를 변수로 할당
+KEYWORD_CATEGORIES = config['KEYWORD_CATEGORIES']
+EXCLUDE_KEYWORDS = config['EXCLUDE_KEYWORDS']
+CATEGORIES = config['CATEGORIES']
 def categorize_by_keywords(title, content_text):
     # 제목과 내용에서 키워드를 검색하여 게시판을 직접 분류. 매핑된 카테고리가 있는 경우 해당 카테고리로 분류, 아니면 None 반환
     for keyword, category in KEYWORD_CATEGORIES.items():
@@ -110,18 +79,7 @@ def main():
                 category = categorize_announcement(partial_ann.title, partial_ann.content_text)
                 print(f"카테고리 분류 결과: {category}")
 
-                if category in [
-                    "교육/특강/프로그램",
-                    "[공모전] 공학/IT/SW",
-                    "[공모전] 아이디어/기획",
-                    "[공모전] 미술/디자인/건축",
-                    "[공모전] 문학/수기/에세이",
-                    "[공모전] 기타",
-                    "장학금",
-                    "봉사활동",
-                    "서포터즈",
-                    "취업 정보"
-                ]:
+                if category in CATEGORIES:
                     # 전체 공지사항 크롤링
                     full_ann = crawl_ann(url)
                     full_ann.notice_board_name = category  # 게시판 이름 업데이트
@@ -166,18 +124,7 @@ def main_specific(url, course_url):
         category = categorize_announcement(partial_ann.title, partial_ann.content_text)
         print(f"카테고리 분류 결과: {category}")
 
-        if category in [
-            "교육/특강/프로그램",
-            "[공모전] 공학/IT/SW",
-            "[공모전] 아이디어/기획",
-            "[공모전] 미술/디자인/건축",
-            "[공모전] 문학/수기/에세이",
-            "[공모전] 기타",
-            "장학금",
-            "봉사활동",
-            "서포터즈",
-            "취업 정보"
-        ]:
+        if category in CATEGORIES:
             # 전체 공지사항 크롤링
             full_ann = crawl_ann(url)
             full_ann.notice_board_name = category  # 게시판 이름 업데이트
@@ -192,7 +139,7 @@ def main_specific(url, course_url):
         print("공지사항 크롤링에 실패했습니다.")
 
 if __name__ == "__main__":
-    use_specific = True  # False로 변경하면 main() 함수가 실행됨
+    use_specific = False  # False로 변경하면 main() 함수가 실행됨
 
     if use_specific:
         url = input("URL을 입력하세요: ")
